@@ -1,0 +1,299 @@
+.app {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(15, 20, 30, 0.6);
+  backdrop-filter: blur(10px);
+  border-radius: 14px;
+}
+
+.brand .title {
+  font-size: 16px;
+  font-weight: 650;
+  letter-spacing: 0.2px;
+}
+.brand .subtitle {
+  font-size: 12px;
+  color: rgba(231, 233, 238, 0.72);
+}
+
+.main {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.panel {
+  padding: 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(15, 20, 30, 0.55);
+  backdrop-filter: blur(10px);
+  min-width: 0;
+}
+
+.panel h2 {
+  margin: 0 0 10px;
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 10px 12px;
+  resize: vertical;
+  outline: none;
+}
+.textarea:focus {
+  border-color: rgba(138, 180, 255, 0.7);
+}
+.textarea.code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+  font-size: 12.5px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+.chip {
+  padding: 6px 10px;
+  font-size: 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.controls {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.field > span {
+  font-size: 12px;
+  color: rgba(231, 233, 238, 0.72);
+}
+
+select,
+input[type='range'] {
+  width: 100%;
+}
+
+select {
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 8px 10px;
+  outline: none;
+}
+select:focus {
+  border-color: rgba(138, 180, 255, 0.7);
+}
+
+.segmented {
+  display: flex;
+  gap: 8px;
+}
+.segBtn {
+  flex: 1;
+  font-size: 12px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.03);
+}
+.segBtn.active {
+  border-color: rgba(138, 180, 255, 0.8);
+  background: rgba(138, 180, 255, 0.12);
+}
+
+.row {
+  margin-top: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.btn {
+  padding: 9px 12px;
+}
+.btn.primary {
+  background: rgba(138, 180, 255, 0.18);
+  border-color: rgba(138, 180, 255, 0.22);
+}
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.error {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(248, 113, 113, 0.35);
+  background: rgba(248, 113, 113, 0.10);
+  color: rgba(254, 202, 202, 0.95);
+  font-size: 13px;
+  white-space: pre-wrap;
+}
+
+.meta {
+  margin-top: 10px;
+  margin-bottom: 12px;
+  display: grid;
+  gap: 6px;
+}
+.metaLine {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+}
+.metaKey {
+  width: 90px;
+  font-size: 12px;
+  color: rgba(231, 233, 238, 0.72);
+}
+.metaVal {
+  font-size: 13px;
+  color: rgba(231, 233, 238, 0.9);
+}
+
+.hint {
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px dashed rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.02);
+  color: rgba(231, 233, 238, 0.70);
+  font-size: 13px;
+}
+.hint code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+  font-size: 12.5px;
+  padding: 2px 6px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.status {
+  margin-bottom: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.03);
+  font-size: 13px;
+  color: rgba(231, 233, 238, 0.82);
+}
+.status.ok {
+  border-color: rgba(34, 197, 94, 0.25);
+}
+.status.err {
+  border-color: rgba(248, 113, 113, 0.25);
+}
+
+.details {
+  margin-top: 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.02);
+  padding: 10px 12px;
+}
+.details summary {
+  cursor: pointer;
+  font-size: 13px;
+  color: rgba(231, 233, 238, 0.75);
+}
+.pre {
+  margin: 10px 0 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+  font-size: 12px;
+  color: rgba(231, 233, 238, 0.85);
+}
+
+.history {
+  grid-column: 1 / -1;
+}
+.historyActions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 10px;
+}
+.historyList {
+  display: grid;
+  gap: 10px;
+}
+.historyItem {
+  text-align: left;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.03);
+}
+.historyItem.ok {
+  border-color: rgba(34, 197, 94, 0.25);
+}
+.historyItem.err {
+  border-color: rgba(248, 113, 113, 0.25);
+}
+.historyTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.historyTitle {
+  font-size: 13px;
+  font-weight: 650;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.historyBadge {
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  color: rgba(231, 233, 238, 0.75);
+}
+.historyBottom {
+  margin-top: 6px;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 11.5px;
+  color: rgba(231, 233, 238, 0.65);
+}
+
+@media (max-width: 980px) {
+  .main {
+    grid-template-columns: 1fr;
+  }
+}
