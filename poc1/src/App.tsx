@@ -134,7 +134,7 @@ function App() {
       try {
         const { version } = await pingOllama()
         if (cancelled) return
-        const model = (import.meta.env.VITE_OLLAMA_MODEL as string | undefined) || 'qwen2.5:1.5b'
+        const model = (import.meta.env.VITE_OLLAMA_MODEL as string | undefined) || 'qwen3'
         setOllamaStatus({ ok: true, detail: `Connected (v${version || '?'}) · model: ${model}` })
       } catch (e) {
         if (cancelled) return
@@ -519,7 +519,7 @@ function App() {
               <br />
               1) Install Ollama (Mac): https://ollama.com/download
               <br />
-              2) Pull the model: <code>ollama pull qwen2.5:1.5b</code>
+              2) Pull the model: <code>ollama pull qwen3</code>
               <br />
               3) Run: <code>ollama serve</code> (or open the Ollama app)
             </div>

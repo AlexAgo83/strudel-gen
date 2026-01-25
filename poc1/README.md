@@ -1,4 +1,4 @@
-# Strudel Gen (local) — web prototype
+# Strudel Gen (local) — POC1
 
 Local-only prototype that generates Strudel code via Ollama and plays it in the browser via `@strudel/web`.
 
@@ -12,7 +12,7 @@ Local-only prototype that generates Strudel code via Ollama and plays it in the 
 ```bash
 brew install ollama
 brew services start ollama
-ollama pull qwen2.5:1.5b
+ollama pull qwen3
 curl http://localhost:11434/api/version
 ```
 
@@ -27,7 +27,7 @@ npm run dev
 ## Config
 
 - `VITE_OLLAMA_HOST`: Ollama base URL (default: `http://localhost:11434`)
-- `VITE_OLLAMA_MODEL`: model name (default: `qwen2.5:1.5b`)
+- `VITE_OLLAMA_MODEL`: model name (default: `qwen3`)
 - `VITE_OLLAMA_API_KEY`: optional; if set, it is bundled into the frontend build (local-only)
 - `VITE_DISABLE_HMR`: set to `1` to disable Vite HMR if your environment blocks WebSockets
 

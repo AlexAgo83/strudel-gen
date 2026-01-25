@@ -22,10 +22,10 @@
 
 # Validation
 - `python3 logics/skills/logics-doc-linter/scripts/logics_lint.py`
-- Ollama: `curl http://localhost:11434/api/version` and `ollama pull qwen2.5:1.5b`
-- Web: `cd web && npm run dev`
+- Ollama: `curl http://localhost:11434/api/version` and `ollama pull qwen3`
+- Web: `cd poc1 && npm run dev`
 - Manual smoke test: Test sound → Generate → Play → Stop → Regenerate → Restore from history → Copy/share → Reload shared URL
 
 # Report
-- Status: prototype UI and local generation are working under `web/`.
+- Status: prototype UI and local generation are working under `poc1/`.
 - Known limitation: very small local models can output invalid/unplayable Strudel; mitigations include JSON schema forcing, normalization, repair prompt, and a heuristic rebuild fallback.

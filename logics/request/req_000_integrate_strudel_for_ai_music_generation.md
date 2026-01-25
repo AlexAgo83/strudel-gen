@@ -14,7 +14,7 @@
 - Platform: web app (browser/WebAudio). Prioritize a fast prototype with minimal backend dependencies.
 - AI: local-first prototype using Ollama (chat API) with a lightweight Qwen model; no dedicated backend/API initially.
 - Guardrails: AI output is untrusted. Execution must be sandboxed and restricted to a safe Strudel subset (no arbitrary JS execution).
-- Prototype implementation: `web/` (Vite+React), direct Strudel integration via `@strudel/web`, dev proxy to Ollama to avoid CORS in local.
+- Prototype implementation: `poc1/` (Vite+React), direct Strudel integration via `@strudel/web`, dev proxy to Ollama to avoid CORS in local.
 - Key product questions to decide early:
   - Expected generation time budget and cost constraints (model/provider).
   - Default loop length (bars) and default tempo.

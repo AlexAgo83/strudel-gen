@@ -35,5 +35,5 @@ Absolute beginners (no music knowledge) want to generate short musical loops qui
 - Target audience: absolute beginners (no music knowledge). UI must avoid jargon and work with sensible defaults.
 - Prototype goal: ship an end-to-end demo quickly; prefer local-only persistence (localStorage) and minimal backend.
 - Prototype AI stack: Ollama (local) with a lightweight Qwen model; no dedicated backend/API initially.
-- Prototype implementation: `web/` (Vite+React), direct Strudel integration via `@strudel/web`, with guardrails + normalization + repair/fallback to increase playability with small models.
+- Prototype implementation: `poc1/` (Vite+React), direct Strudel integration via `@strudel/web`, with guardrails + normalization + repair/fallback to increase playability with small models.
 - Implementation depends on: (1) the selected Strudel runtime integration approach, (2) the LLM provider and prompt format, (3) the desired persistence model (session vs. user account).

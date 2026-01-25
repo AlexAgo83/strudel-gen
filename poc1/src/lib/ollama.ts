@@ -94,7 +94,7 @@ async function ollamaChat(messages: Array<{ role: 'system' | 'user'; content: st
   const headers: Record<string, string> = { 'Content-Type': 'application/json' }
   if (env.apiKey?.trim()) headers.Authorization = `Bearer ${env.apiKey.trim()}`
 
-  const model = env.model || 'qwen2.5:1.5b'
+  const model = env.model || 'qwen3'
   const format = {
     type: 'object',
     additionalProperties: false,
