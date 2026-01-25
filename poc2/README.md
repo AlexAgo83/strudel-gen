@@ -24,6 +24,17 @@ npm install
 npm run dev
 ```
 
+## Run (built, still local)
+
+This uses a tiny local Node server that serves `dist/` and proxies `/ollama/*` → `VITE_OLLAMA_HOST` (no CORS issues).
+
+```bash
+cp .env.example .env.local
+npm install
+npm run build
+npm run start
+```
+
 ## Config
 
 - `VITE_OLLAMA_HOST`: Ollama base URL (default: `http://localhost:11434`)
