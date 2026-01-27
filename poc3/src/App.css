@@ -12,10 +12,14 @@
 }
 
 .footer {
-  margin-top: 18px;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 14px;
   text-align: center;
   font-size: 12px;
   color: rgba(231, 233, 238, 0.6);
+  pointer-events: none;
 }
 
 .top {
@@ -58,12 +62,29 @@
   background: rgba(239, 68, 68, 0.08);
 }
 
+.pill.small {
+  font-size: 11px;
+  padding: 3px 8px;
+}
+
 .card {
   border-radius: 14px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(17, 23, 34, 0.55);
   box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
   padding: 14px;
+}
+
+.labelRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.labelRow .label {
+  margin-bottom: 0;
 }
 
 .label {
@@ -170,6 +191,29 @@ textarea:focus {
 
 .out.md > :last-child {
   margin-bottom: 0;
+}
+
+.reflection {
+  margin: 0 0 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.18);
+  padding: 8px 10px;
+}
+
+.reflection summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: rgba(231, 233, 238, 0.8);
+}
+
+.reflectionOut {
+  margin: 8px 0 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 12px;
+  line-height: 1.45;
+  color: rgba(231, 233, 238, 0.8);
 }
 
 .hint {

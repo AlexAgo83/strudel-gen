@@ -1,23 +1,57 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import './App.css'
-import { chat, pingOllama } from './lib/ollama'
+import { chatStream, pingOllama, type ChatStreamProgress } from './lib/ollama'
 
 function getDefaultPrompt() {
   return 'Write a short explanation of what Strudel is, in French.'
 }
 
+function splitReflection(raw: string): { reflection: string; answer: string } {
+  const blocks: string[] = []
+  const patterns = [
+    /<think>([\s\S]*?)<\/think>/gi,
+    /<analysis>([\s\S]*?)<\/analysis>/gi,
+    /<reflection>([\s\S]*?)<\/reflection>/gi,
+  ]
+
+  let answer = raw
+  for (const re of patterns) {
+    answer = answer.replace(re, (_m, g1: string) => {
+      blocks.push(g1.trim())
+      return ''
+    })
+  }
+
+  return {
+    reflection: blocks.join('\n\n').trim(),
+    answer: answer.trimStart(),
+  }
+}
+
+function formatElapsed(ms: number) {
+  const sec = Math.floor(ms / 1000)
+  const remMs = Math.floor(ms % 1000)
+  if (sec < 60) return `${sec}.${String(Math.floor(remMs / 100)).padStart(1, '0')}s`
+  const min = Math.floor(sec / 60)
+  const rem = sec % 60
+  return `${min}m${String(rem).padStart(2, '0')}s`
+}
+
 export default function App() {
   const model = useMemo(() => (import.meta.env.VITE_OLLAMA_MODEL as string | undefined) || 'qwen3', [])
   const [prompt, setPrompt] = useState(() => getDefaultPrompt())
-  const [response, setResponse] = useState<string>('')
+  const [rawResponse, setRawResponse] = useState<string>('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string>('')
   const [ollamaStatus, setOllamaStatus] = useState<{ ok: boolean; detail: string }>({
     ok: false,
     detail: 'Checking Ollama…',
   })
+  const [progress, setProgress] = useState<ChatStreamProgress | null>(null)
+  const startRef = useRef<number | null>(null)
+  const abortRef = useRef<AbortController | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -36,28 +70,60 @@ export default function App() {
     }
   }, [])
 
+  useEffect(() => {
+    if (!busy || startRef.current === null) return
+    const timer = window.setInterval(() => {
+      const elapsedMs = Math.max(0, Math.round(performance.now() - (startRef.current ?? performance.now())))
+      setProgress((prev) => (prev ? { ...prev, elapsedMs: Math.max(prev.elapsedMs, elapsedMs) } : { chunks: 0, chars: 0, elapsedMs }))
+    }, 150)
+    return () => window.clearInterval(timer)
+  }, [busy])
+
   async function handleSend() {
+    abortRef.current?.abort()
+    const controller = new AbortController()
+    abortRef.current = controller
+
     setBusy(true)
     setError('')
-    setResponse('')
+    setRawResponse('')
+    setProgress({ chunks: 0, chars: 0, elapsedMs: 0 })
+    startRef.current = performance.now()
     try {
-      const out = await chat(prompt)
-      setResponse(out)
+      const out = await chatStream(prompt, {
+        signal: controller.signal,
+        onUpdate: (content, p) => {
+          setRawResponse(content)
+          setProgress(p)
+        },
+      })
+      setRawResponse(out)
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : String(e))
+      if (e instanceof DOMException && e.name === 'AbortError') {
+        setError('Cancelled.')
+      } else {
+        setError(e instanceof Error ? e.message : String(e))
+      }
     } finally {
       setBusy(false)
+      abortRef.current = null
     }
   }
 
+  function handleStop() {
+    abortRef.current?.abort()
+  }
+
   async function handleCopy() {
-    if (!response.trim()) return
+    if (!renderedAnswer.trim()) return
     try {
-      await navigator.clipboard.writeText(response)
+      await navigator.clipboard.writeText(renderedAnswer)
     } catch {
       // ignore
     }
   }
+
+  const { reflection, answer: renderedAnswer } = useMemo(() => splitReflection(rawResponse), [rawResponse])
 
   return (
     <div className="wrap">
@@ -80,7 +146,7 @@ export default function App() {
           />
           <div className="actions">
             <button className="primary" onClick={handleSend} disabled={busy || !ollamaStatus.ok}>
-              {busy ? 'Sending…' : 'Send'}
+              {busy ? 'Streaming…' : 'Send'}
             </button>
             <button onClick={() => setPrompt('')} disabled={busy}>
               Clear prompt
@@ -105,19 +171,37 @@ export default function App() {
         </div>
 
         <div className="card" style={{ marginTop: 14 }}>
-          <div className="label">Response</div>
+          <div className="labelRow">
+            <div className="label">Response</div>
+            {busy ? (
+              <span className="pill small">
+                Streaming · {formatElapsed(progress?.elapsedMs ?? 0)} · {(progress?.chars ?? 0).toLocaleString()} chars
+              </span>
+            ) : null}
+          </div>
+
+          {reflection ? (
+            <details className="reflection" open={busy}>
+              <summary>Reflection (if available)</summary>
+              <pre className="reflectionOut">{reflection}</pre>
+            </details>
+          ) : null}
+
           <div className="out md">
-            {response ? (
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>{response}</ReactMarkdown>
+            {renderedAnswer ? (
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>{renderedAnswer}</ReactMarkdown>
             ) : busy ? (
               '…'
             ) : null}
           </div>
           <div className="actions">
-            <button onClick={handleCopy} disabled={busy || !response.trim()}>
+            <button onClick={handleStop} disabled={!busy}>
+              Stop
+            </button>
+            <button onClick={handleCopy} disabled={busy || !renderedAnswer.trim()}>
               Copy response
             </button>
-            <button onClick={() => setResponse('')} disabled={busy || !response}>
+            <button onClick={() => setRawResponse('')} disabled={busy || !rawResponse}>
               Clear response
             </button>
           </div>
