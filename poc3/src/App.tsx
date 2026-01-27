@@ -2,32 +2,40 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import './App.css'
-import { chatStream, pingOllama, type ChatStreamProgress } from './lib/ollama'
+import { chatStreamMessages, pingOllama, type ChatMessage, type ChatStreamProgress } from './lib/ollama'
 
 function getDefaultPrompt() {
   return 'Write a short explanation of what Strudel is, in French.'
 }
 
 function splitReflection(raw: string): { reflection: string; answer: string } {
-  const blocks: string[] = []
-  const patterns = [
-    /<think>([\s\S]*?)<\/think>/gi,
-    /<analysis>([\s\S]*?)<\/analysis>/gi,
-    /<reflection>([\s\S]*?)<\/reflection>/gi,
+  const tags = [
+    { open: '<think>', close: '</think>' },
+    { open: '<analysis>', close: '</analysis>' },
+    { open: '<reflection>', close: '</reflection>' },
   ]
 
   let answer = raw
-  for (const re of patterns) {
-    answer = answer.replace(re, (_m, g1: string) => {
-      blocks.push(g1.trim())
-      return ''
-    })
+  const reflections: string[] = []
+
+  for (const t of tags) {
+    const lower = answer.toLowerCase()
+    const openIndex = lower.indexOf(t.open)
+    if (openIndex === -1) continue
+    const afterOpen = openIndex + t.open.length
+    const closeIndex = lower.indexOf(t.close, afterOpen)
+    if (closeIndex === -1) {
+      const chunk = answer.slice(afterOpen).trim()
+      if (chunk) reflections.push(chunk)
+      answer = answer.slice(0, openIndex)
+      continue
+    }
+    const chunk = answer.slice(afterOpen, closeIndex).trim()
+    if (chunk) reflections.push(chunk)
+    answer = answer.slice(0, openIndex) + answer.slice(closeIndex + t.close.length)
   }
 
-  return {
-    reflection: blocks.join('\n\n').trim(),
-    answer: answer.trimStart(),
-  }
+  return { reflection: reflections.join('\n\n').trim(), answer: answer.trimStart() }
 }
 
 function formatElapsed(ms: number) {
@@ -52,6 +60,8 @@ export default function App() {
   const [progress, setProgress] = useState<ChatStreamProgress | null>(null)
   const startRef = useRef<number | null>(null)
   const abortRef = useRef<AbortController | null>(null)
+  const [keepContext, setKeepContext] = useState(false)
+  const [contextMessages, setContextMessages] = useState<ChatMessage[]>([])
 
   useEffect(() => {
     let cancelled = false
@@ -80,9 +90,15 @@ export default function App() {
   }, [busy])
 
   async function handleSend() {
+    const promptToSend = prompt.trim()
+    if (!promptToSend) return
+
     abortRef.current?.abort()
     const controller = new AbortController()
     abortRef.current = controller
+
+    const base: ChatMessage[] = keepContext ? contextMessages : []
+    const userMessage: ChatMessage = { role: 'user', content: promptToSend }
 
     setBusy(true)
     setError('')
@@ -90,7 +106,7 @@ export default function App() {
     setProgress({ chunks: 0, chars: 0, elapsedMs: 0 })
     startRef.current = performance.now()
     try {
-      const out = await chatStream(prompt, {
+      const out = await chatStreamMessages([...base, userMessage], {
         signal: controller.signal,
         onUpdate: (content, p) => {
           setRawResponse(content)
@@ -98,6 +114,10 @@ export default function App() {
         },
       })
       setRawResponse(out)
+
+      const { answer } = splitReflection(out)
+      const assistantMessage: ChatMessage = { role: 'assistant', content: (answer || out).trim() }
+      setContextMessages([...base, userMessage, assistantMessage])
     } catch (e: unknown) {
       if (e instanceof DOMException && e.name === 'AbortError') {
         setError('Cancelled.')
@@ -121,6 +141,10 @@ export default function App() {
     } catch {
       // ignore
     }
+  }
+
+  function handleClearContext() {
+    setContextMessages([])
   }
 
   const { reflection, answer: renderedAnswer } = useMemo(() => splitReflection(rawResponse), [rawResponse])
@@ -150,6 +174,18 @@ export default function App() {
             </button>
             <button onClick={() => setPrompt('')} disabled={busy}>
               Clear prompt
+            </button>
+            <label className="toggle" title="When enabled, the next request includes previous messages.">
+              <input
+                type="checkbox"
+                checked={keepContext}
+                onChange={(e) => setKeepContext(e.target.checked)}
+                disabled={busy}
+              />
+              Keep context
+            </label>
+            <button onClick={handleClearContext} disabled={busy || contextMessages.length === 0}>
+              Clear context
             </button>
           </div>
 

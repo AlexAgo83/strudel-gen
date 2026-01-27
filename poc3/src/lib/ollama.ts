@@ -29,7 +29,16 @@ export type ChatStreamProgress = {
   elapsedMs: number
 }
 
+export type ChatMessage = {
+  role: 'system' | 'user' | 'assistant'
+  content: string
+}
+
 export async function chat(prompt: string): Promise<string> {
+  return chatMessages([{ role: 'user', content: prompt }])
+}
+
+export async function chatMessages(messages: ChatMessage[]): Promise<string> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' }
   if (env.apiKey?.trim()) headers.Authorization = `Bearer ${env.apiKey.trim()}`
 
@@ -43,7 +52,7 @@ export async function chat(prompt: string): Promise<string> {
       body: JSON.stringify({
         model,
         stream: false,
-        messages: [{ role: 'user', content: prompt }],
+        messages,
         options: { temperature: 0.6 },
       }),
     })
@@ -69,6 +78,20 @@ export async function chatStream(
     onUpdate?: (content: string, progress: ChatStreamProgress) => void
   },
 ): Promise<string> {
+  return chatStreamMessages(
+    [{ role: 'user', content: prompt } satisfies ChatMessage],
+    { signal: opts?.signal, onUpdate: opts?.onUpdate },
+  )
+}
+
+export async function chatStreamMessages(
+  messages: ChatMessage[],
+  opts?: {
+    signal?: AbortSignal
+    onUpdate?: (content: string, progress: ChatStreamProgress) => void
+  },
+): Promise<string> {
+  if (messages.length === 0) throw new Error('Missing messages.')
   const headers: Record<string, string> = { 'Content-Type': 'application/json' }
   if (env.apiKey?.trim()) headers.Authorization = `Bearer ${env.apiKey.trim()}`
 
@@ -83,7 +106,7 @@ export async function chatStream(
       body: JSON.stringify({
         model,
         stream: true,
-        messages: [{ role: 'user', content: prompt }],
+        messages,
         options: { temperature: 0.6 },
       }),
     })
@@ -98,7 +121,7 @@ export async function chatStream(
   }
 
   if (!res.body) {
-    const fallback = await chat(prompt)
+    const fallback = await chatMessages(messages)
     opts?.onUpdate?.(fallback, { chunks: 1, chars: fallback.length, elapsedMs: 0 })
     return fallback
   }

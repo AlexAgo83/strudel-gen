@@ -115,6 +115,23 @@ textarea:focus {
   margin-top: 12px;
 }
 
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.55em 0.7em;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background-color: rgba(255, 255, 255, 0.04);
+  font-size: 0.95em;
+  user-select: none;
+}
+
+.toggle input {
+  width: 16px;
+  height: 16px;
+}
+
 .primary {
   border-color: rgba(138, 180, 255, 0.35);
   background: rgba(138, 180, 255, 0.12);
