@@ -9,7 +9,6 @@ dotenv.config({ path: path.join(process.cwd(), '.env') })
 
 const distDir = path.join(process.cwd(), 'dist')
 if (!fs.existsSync(distDir)) {
-  // eslint-disable-next-line no-console
   console.error('Missing dist/. Run `npm run build` first.')
   process.exit(1)
 }
@@ -36,6 +35,5 @@ app.get(/.*/, (req, res) => {
 })
 
 app.listen(port, () => {
-  // eslint-disable-next-line no-console
   console.log(`POC2 server running on http://localhost:${port} (proxy -> ${target})`)
 })

@@ -90,23 +90,8 @@ textarea:focus {
   background: rgba(138, 180, 255, 0.18);
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 14px;
-  margin-top: 14px;
-}
-
-@media (min-width: 900px) {
-  .grid {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
 .out {
-  white-space: pre-wrap;
   word-break: break-word;
-  margin: 0;
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(0, 0, 0, 0.25);
@@ -114,6 +99,63 @@ textarea:focus {
   min-height: 140px;
   max-height: 55dvh;
   overflow: auto;
+}
+
+.out.md {
+  white-space: normal;
+  line-height: 1.55;
+  font-size: 14px;
+}
+
+.out.md :where(h1, h2, h3) {
+  margin: 10px 0 8px;
+  line-height: 1.2;
+}
+
+.out.md :where(p, ul, ol, pre, blockquote, table) {
+  margin: 0 0 10px;
+}
+
+.out.md :where(ul, ol) {
+  padding-left: 20px;
+}
+
+.out.md :where(pre) {
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.35);
+  padding: 10px;
+  overflow: auto;
+}
+
+.out.md :where(code) {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+  font-size: 0.95em;
+}
+
+.out.md :not(pre) > code {
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.35);
+  padding: 1px 6px;
+}
+
+.out.md :where(blockquote) {
+  border-left: 3px solid rgba(138, 180, 255, 0.55);
+  padding-left: 10px;
+  color: rgba(231, 233, 238, 0.85);
+}
+
+.out.md :where(a) {
+  color: rgba(138, 180, 255, 0.95);
+}
+
+.out.md > :first-child {
+  margin-top: 0;
+}
+
+.out.md > :last-child {
+  margin-bottom: 0;
 }
 
 .hint {

@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import './App.css'
 import { chat, pingOllama } from './lib/ollama'
 
@@ -101,28 +103,22 @@ export default function App() {
         {error ? <div className="errbox">{error}</div> : null}
       </div>
 
-      <div className="grid">
-        <div className="card">
-          <div className="label">Response</div>
-          <pre className="out">{response || (busy ? '…' : '')}</pre>
-          <div className="actions">
-            <button onClick={handleCopy} disabled={busy || !response.trim()}>
-              Copy response
-            </button>
-            <button onClick={() => setResponse('')} disabled={busy || !response}>
-              Clear response
-            </button>
-          </div>
+      <div className="card" style={{ marginTop: 14 }}>
+        <div className="label">Response</div>
+        <div className="out md">
+          {response ? (
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{response}</ReactMarkdown>
+          ) : busy ? (
+            '…'
+          ) : null}
         </div>
-
-        <div className="card">
-          <div className="label">Notes</div>
-          <div className="hint">
-            - This POC calls Ollama via <code>/ollama/api/chat</code> (Vite dev proxy to avoid CORS).
-            <br />
-            - No streaming yet; it waits for the full response.
-            <br />- No Strudel integration in this POC.
-          </div>
+        <div className="actions">
+          <button onClick={handleCopy} disabled={busy || !response.trim()}>
+            Copy response
+          </button>
+          <button onClick={() => setResponse('')} disabled={busy || !response}>
+            Clear response
+          </button>
         </div>
       </div>
     </div>
