@@ -33,10 +33,23 @@ Notes:
 
 ## POC2 — Prompt → response (local)
 
-Minimal local-only UI under `poc2/` that sends a prompt to Ollama (`qwen3`) and displays the raw response (no Strudel integration yet).
+Minimal local-only UI under `poc2/` that sends a prompt to Ollama (`qwen3`) and renders the response as Markdown (no Strudel integration yet).
+
+Note: `poc2/` is now considered frozen; implement follow-up iterations in `poc3/`.
 
 ```bash
 cd poc2
+cp .env.example .env.local
+npm install
+npm run dev
+```
+
+## POC3 — Prompt → response (local, active iteration)
+
+`poc3/` starts as a baseline copy of `poc2/` and is the place for further prototype changes.
+
+```bash
+cd poc3
 cp .env.example .env.local
 npm install
 npm run dev
