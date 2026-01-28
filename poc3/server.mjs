@@ -13,7 +13,7 @@ if (!fs.existsSync(distDir)) {
   process.exit(1)
 }
 
-const target = process.env.VITE_OLLAMA_HOST || 'http://localhost:11434'
+const target = process.env.VITE_OLLAMA_HOST || 'http://127.0.0.1:11434'
 const port = Number(process.env.PORT || '') || 4173
 
 const app = express()
@@ -24,6 +24,12 @@ app.use(
     target,
     changeOrigin: true,
     pathRewrite: { '^/ollama': '' },
+    on: {
+      proxyReq(proxyReq) {
+        // Same reason as Vite dev proxy: Ollama can reject non-local Origins with 403.
+        proxyReq.removeHeader('origin')
+      },
+    },
   }),
 )
 

@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), 'VITE_')
-  const target = env.VITE_OLLAMA_HOST || 'http://localhost:11434'
+  const target = env.VITE_OLLAMA_HOST || 'http://127.0.0.1:11434'
   const disableHmr = env.VITE_DISABLE_HMR === '1'
 
   return {
@@ -26,6 +26,13 @@ export default defineConfig(({ mode }) => {
         '/ollama': {
           target,
           changeOrigin: true,
+          configure: (proxy) => {
+            proxy.on('proxyReq', (proxyReq) => {
+              // Ollama may 403 when the browser's Origin is a LAN URL (e.g. http://192.168.x.x:5173).
+              // Since we proxy same-origin through Vite, we can safely drop Origin.
+              proxyReq.removeHeader('origin')
+            })
+          },
           rewrite: (path) => path.replace(/^\/ollama/, ''),
         },
       },
