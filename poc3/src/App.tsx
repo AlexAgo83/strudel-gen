@@ -50,7 +50,6 @@ function formatElapsed(ms: number) {
 export default function App() {
   const model = useMemo(() => (import.meta.env.VITE_OLLAMA_MODEL as string | undefined) || 'qwen3', [])
   const [prompt, setPrompt] = useState(() => getDefaultPrompt())
-  const [rawResponse, setRawResponse] = useState<string>('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string>('')
   const [ollamaStatus, setOllamaStatus] = useState<{ ok: boolean; detail: string }>({
@@ -60,8 +59,22 @@ export default function App() {
   const [progress, setProgress] = useState<ChatStreamProgress | null>(null)
   const startRef = useRef<number | null>(null)
   const abortRef = useRef<AbortController | null>(null)
-  const [keepContext, setKeepContext] = useState(false)
+  const [keepContext, setKeepContext] = useState(true)
   const [contextMessages, setContextMessages] = useState<ChatMessage[]>([])
+  const [history, setHistory] = useState<
+    {
+      id: number
+      prompt: string
+      raw: string
+      answer: string
+      reflection: string
+      createdAt: number
+      streaming: boolean
+      error?: string
+    }[]
+  >([])
+  const historyIdRef = useRef(0)
+  const [streamingId, setStreamingId] = useState<number | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -92,6 +105,7 @@ export default function App() {
   async function handleSend() {
     const promptToSend = prompt.trim()
     if (!promptToSend) return
+    setPrompt('')
 
     abortRef.current?.abort()
     const controller = new AbortController()
@@ -99,33 +113,80 @@ export default function App() {
 
     const base: ChatMessage[] = keepContext ? contextMessages : []
     const userMessage: ChatMessage = { role: 'user', content: promptToSend }
+    const id = (historyIdRef.current += 1)
+    const createdAt = Date.now()
 
     setBusy(true)
     setError('')
-    setRawResponse('')
     setProgress({ chunks: 0, chars: 0, elapsedMs: 0 })
     startRef.current = performance.now()
+    setStreamingId(id)
+    setHistory((prev) => [
+      {
+        id,
+        prompt: promptToSend,
+        raw: '',
+        answer: '',
+        reflection: '',
+        createdAt,
+        streaming: true,
+      },
+      ...prev,
+    ])
     try {
       const out = await chatStreamMessages([...base, userMessage], {
         signal: controller.signal,
         onUpdate: (content, p) => {
-          setRawResponse(content)
           setProgress(p)
+          const { reflection, answer } = splitReflection(content)
+          setHistory((prev) =>
+            prev.map((item) =>
+              item.id === id
+                ? {
+                    ...item,
+                    raw: content,
+                    reflection,
+                    answer,
+                    streaming: true,
+                  }
+                : item,
+            ),
+          )
         },
       })
-      setRawResponse(out)
 
       const { answer } = splitReflection(out)
       const assistantMessage: ChatMessage = { role: 'assistant', content: (answer || out).trim() }
       setContextMessages([...base, userMessage, assistantMessage])
+      setHistory((prev) =>
+        prev.map((item) =>
+          item.id === id
+            ? {
+                ...item,
+                raw: out,
+                reflection: splitReflection(out).reflection,
+                answer: assistantMessage.content,
+                streaming: false,
+              }
+            : item,
+        ),
+      )
     } catch (e: unknown) {
       if (e instanceof DOMException && e.name === 'AbortError') {
         setError('Cancelled.')
+        setHistory((prev) =>
+          prev.map((item) => (item.id === id ? { ...item, streaming: false, error: 'Cancelled.' } : item)),
+        )
       } else {
-        setError(e instanceof Error ? e.message : String(e))
+        const message = e instanceof Error ? e.message : String(e)
+        setError(message)
+        setHistory((prev) =>
+          prev.map((item) => (item.id === id ? { ...item, streaming: false, error: message } : item)),
+        )
       }
     } finally {
       setBusy(false)
+      setStreamingId(null)
       abortRef.current = null
     }
   }
@@ -135,9 +196,11 @@ export default function App() {
   }
 
   async function handleCopy() {
-    if (!renderedAnswer.trim()) return
+    const latest = history[0]
+    const text = latest?.answer?.trim() ?? ''
+    if (!text) return
     try {
-      await navigator.clipboard.writeText(renderedAnswer)
+      await navigator.clipboard.writeText(text)
     } catch {
       // ignore
     }
@@ -147,7 +210,11 @@ export default function App() {
     setContextMessages([])
   }
 
-  const { reflection, answer: renderedAnswer } = useMemo(() => splitReflection(rawResponse), [rawResponse])
+  function handleClearHistory() {
+    setHistory([])
+    setProgress(null)
+    setError('')
+  }
 
   return (
     <div className="wrap">
@@ -167,6 +234,12 @@ export default function App() {
             onChange={(e) => setPrompt(e.target.value)}
             placeholder="Type your prompt…"
             spellCheck={false}
+            onKeyDown={(e) => {
+              if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+                e.preventDefault()
+                handleSend()
+              }
+            }}
           />
           <div className="actions">
             <button className="primary" onClick={handleSend} disabled={busy || !ollamaStatus.ok}>
@@ -208,38 +281,63 @@ export default function App() {
 
         <div className="card" style={{ marginTop: 14 }}>
           <div className="labelRow">
-            <div className="label">Response</div>
+            <div className="label">History</div>
             {busy ? (
               <span className="pill small">
                 Streaming · {formatElapsed(progress?.elapsedMs ?? 0)} · {(progress?.chars ?? 0).toLocaleString()} chars
               </span>
             ) : null}
           </div>
-
-          {reflection ? (
-            <details className="reflection" open={busy}>
-              <summary>Reflection (if available)</summary>
-              <pre className="reflectionOut">{reflection}</pre>
-            </details>
-          ) : null}
-
-          <div className="out md">
-            {renderedAnswer ? (
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>{renderedAnswer}</ReactMarkdown>
-            ) : busy ? (
-              '…'
-            ) : null}
-          </div>
           <div className="actions">
             <button onClick={handleStop} disabled={!busy}>
               Stop
             </button>
-            <button onClick={handleCopy} disabled={busy || !renderedAnswer.trim()}>
-              Copy response
+            <button onClick={handleCopy} disabled={busy || !history[0]?.answer?.trim()}>
+              Copy latest
             </button>
-            <button onClick={() => setRawResponse('')} disabled={busy || !rawResponse}>
-              Clear response
+            <button onClick={handleClearHistory} disabled={busy || history.length === 0}>
+              Clear history
             </button>
+          </div>
+
+          <div className="historyList">
+            {history.length === 0 ? <div className="hint">No responses yet.</div> : null}
+            {history.map((item, index) => (
+              <div key={item.id} className={`historyItem ${index === 0 ? 'latest' : ''}`}>
+                <div className="historyMeta">
+                  <span className="pill small">{new Date(item.createdAt).toLocaleTimeString()}</span>
+                  {item.streaming || item.id === streamingId ? (
+                    <span className="pill small">Streaming…</span>
+                  ) : item.error ? (
+                    <span className="pill err small">Error</span>
+                  ) : (
+                    <span className="pill ok small">Done</span>
+                  )}
+                </div>
+                <div className="historyPrompt">
+                  <div className="label">Prompt</div>
+                  <div className="historyText">{item.prompt}</div>
+                </div>
+
+                {item.reflection ? (
+                  <details className="reflection" open={item.streaming}>
+                    <summary>Reflection (if available)</summary>
+                    <pre className="reflectionOut">{item.reflection}</pre>
+                  </details>
+                ) : null}
+
+                <div className="label">Response</div>
+                <div className="out md">
+                  {item.answer ? (
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{item.answer}</ReactMarkdown>
+                  ) : item.streaming ? (
+                    '…'
+                  ) : item.error ? (
+                    item.error
+                  ) : null}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>

@@ -18,7 +18,7 @@ Promoted from `logics/request/req_004_poc3_context_toggle_keep_or_reset.md`.
   - Implement only in `poc3/` (do not change `poc2/`).
 - Out:
   - Persisting chat history (localStorage/server).
-  - Showing a full chat transcript UI (this POC only needs the toggle + behavior).
+  - Full chat transcript UI with rich user/assistant bubbles (a lightweight response history may exist in later changes).
 
 # Acceptance criteria
 - When “Keep context” is OFF, a new prompt is sent as a single-turn chat (`messages` contains only the current user prompt).

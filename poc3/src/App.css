@@ -115,6 +115,11 @@ textarea:focus {
   margin-top: 12px;
 }
 
+.labelRow + .actions {
+  margin-top: 8px;
+  margin-bottom: 12px;
+}
+
 .toggle {
   display: inline-flex;
   align-items: center;
@@ -208,6 +213,42 @@ textarea:focus {
 
 .out.md > :last-child {
   margin-bottom: 0;
+}
+
+.historyList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.historyItem {
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.2);
+  padding: 12px;
+}
+
+.historyItem.latest {
+  border-color: rgba(138, 180, 255, 0.35);
+}
+
+.historyMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.historyPrompt {
+  margin-bottom: 10px;
+}
+
+.historyText {
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 13px;
+  color: rgba(231, 233, 238, 0.92);
 }
 
 .reflection {

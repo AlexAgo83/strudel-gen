@@ -24,6 +24,14 @@ npm install
 npm run dev
 ```
 
+## Usage
+
+- **Keep context** is enabled by default (next prompt includes previous messages).
+- **History** shows newest response at the top.
+- **Streaming** updates the latest response live while generation runs.
+- **Shortcut**: `Cmd+Enter` / `Ctrl+Enter` sends the prompt.
+- The prompt input is cleared automatically after sending.
+
 ## Run (LAN)
 
 Expose the dev server to your local network:
