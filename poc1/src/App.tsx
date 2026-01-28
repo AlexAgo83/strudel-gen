@@ -23,7 +23,7 @@ type HistoryItem = {
   error?: string
 }
 
-const HISTORY_KEY = 'strudel-gen.history.v1'
+const HISTORY_KEY = 'embedded-gen.history.v1'
 const STYLES = ['lofi', 'techno', 'hiphop', 'ambient', 'pop', 'cinematic'] as const
 type Style = (typeof STYLES)[number]
 function isStyle(s: string): s is (typeof STYLES)[number] {

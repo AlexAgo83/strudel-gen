@@ -1,4 +1,4 @@
-# strudel-gen
+# embedded-gen
 
 This repo is bootstrapped with the `cdx-logics-kit` under `logics/skills/` (git submodule).
 
