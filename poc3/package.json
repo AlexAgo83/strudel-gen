@@ -9,7 +9,13 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "start": "node server.mjs"
+    "start": "node server.mjs",
+    "ollama:serve": "ollama serve",
+    "ollama:start": "sh -c 'if command -v brew >/dev/null 2>&1; then brew services start ollama; else ollama serve; fi'",
+    "ollama:stop": "sh -c 'if command -v brew >/dev/null 2>&1; then brew services stop ollama; else pkill -f \"ollama serve\" || true; fi'",
+    "ollama:status": "sh -c 'if command -v brew >/dev/null 2>&1; then brew services list | grep -i ollama || true; else ps aux | grep -i \"ollama serve\" | head -n 2 || true; fi'",
+    "ollama:ping": "sh -c 'curl -s http://127.0.0.1:11434/api/version || true'",
+    "ollama:pull": "sh -c 'ollama pull ${MODEL:-qwen3}'"
   },
   "dependencies": {
     "dotenv": "^16.6.1",
