@@ -1,0 +1,335 @@
+.wrap {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 28px 18px 60px;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.content {
+  flex: 1;
+}
+
+.footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 14px;
+  text-align: center;
+  font-size: 12px;
+  color: rgba(231, 233, 238, 0.6);
+  pointer-events: none;
+}
+
+.top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.title {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.title h1 {
+  margin: 0;
+  font-size: 20px;
+  letter-spacing: 0.2px;
+}
+
+.pill {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(231, 233, 238, 0.85);
+}
+
+.pill.ok {
+  border-color: rgba(34, 197, 94, 0.25);
+  background: rgba(34, 197, 94, 0.08);
+}
+
+.pill.err {
+  border-color: rgba(239, 68, 68, 0.25);
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.pill.small {
+  font-size: 11px;
+  padding: 3px 8px;
+}
+
+.card {
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(17, 23, 34, 0.55);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+  padding: 14px;
+}
+
+.labelRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.labelRow .label {
+  margin-bottom: 0;
+}
+
+.labelMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.label {
+  font-size: 13px;
+  color: rgba(231, 233, 238, 0.85);
+  margin-bottom: 8px;
+}
+
+textarea {
+  width: 100%;
+  min-height: 140px;
+  resize: vertical;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.25);
+  padding: 12px;
+  outline: none;
+}
+
+textarea:focus {
+  border-color: rgba(138, 180, 255, 0.65);
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.labelRow + .actions {
+  margin-top: 8px;
+  margin-bottom: 12px;
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.55em 0.7em;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background-color: rgba(255, 255, 255, 0.04);
+  font-size: 0.95em;
+  user-select: none;
+}
+
+.toggle input {
+  width: 16px;
+  height: 16px;
+}
+
+.primary {
+  border-color: rgba(138, 180, 255, 0.35);
+  background: rgba(138, 180, 255, 0.12);
+}
+
+.primary:hover {
+  border-color: rgba(138, 180, 255, 0.75);
+  background: rgba(138, 180, 255, 0.18);
+}
+
+.out {
+  word-break: break-word;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.25);
+  padding: 12px;
+  min-height: 140px;
+  max-height: 55dvh;
+  overflow: auto;
+}
+
+.out.md {
+  white-space: normal;
+  line-height: 1.55;
+  font-size: 14px;
+}
+
+.out.md :where(h1, h2, h3) {
+  margin: 10px 0 8px;
+  line-height: 1.2;
+}
+
+.out.md :where(p, ul, ol, pre, blockquote, table) {
+  margin: 0 0 10px;
+}
+
+.out.md :where(ul, ol) {
+  padding-left: 20px;
+}
+
+.out.md :where(pre) {
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.35);
+  padding: 10px;
+  overflow: auto;
+}
+
+.out.md :where(code) {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+  font-size: 0.95em;
+}
+
+.out.md :not(pre) > code {
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.35);
+  padding: 1px 6px;
+}
+
+.out.md :where(blockquote) {
+  border-left: 3px solid rgba(138, 180, 255, 0.55);
+  padding-left: 10px;
+  color: rgba(231, 233, 238, 0.85);
+}
+
+.out.md :where(a) {
+  color: rgba(138, 180, 255, 0.95);
+}
+
+.out.md > :first-child {
+  margin-top: 0;
+}
+
+.out.md > :last-child {
+  margin-bottom: 0;
+}
+
+.historyList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.historyItem {
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.2);
+  padding: 12px;
+}
+
+.historyItem.latest {
+  border-color: rgba(138, 180, 255, 0.35);
+}
+
+.historyMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.historyPrompt {
+  margin-bottom: 10px;
+}
+
+.codeRow {
+  margin-top: 12px;
+}
+
+.codeActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.codeOut {
+  margin: 8px 0 0;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.32);
+  padding: 10px;
+  font-size: 12px;
+  line-height: 1.45;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+}
+
+.historyText {
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 13px;
+  color: rgba(231, 233, 238, 0.92);
+}
+
+.reflection {
+  margin: 0 0 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.18);
+  padding: 8px 10px;
+}
+
+.reflection summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: rgba(231, 233, 238, 0.8);
+}
+
+.reflectionOut {
+  margin: 8px 0 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 12px;
+  line-height: 1.45;
+  color: rgba(231, 233, 238, 0.8);
+}
+
+.hint {
+  font-size: 13px;
+  color: rgba(231, 233, 238, 0.8);
+  line-height: 1.55;
+}
+
+.errbox {
+  margin-top: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  background: rgba(239, 68, 68, 0.08);
+  padding: 10px 12px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.92);
+  white-space: pre-wrap;
+}
+
+.warnbox {
+  margin-top: 8px;
+  border-radius: 12px;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  background: rgba(245, 158, 11, 0.12);
+  padding: 8px 10px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.9);
+  white-space: pre-wrap;
+}

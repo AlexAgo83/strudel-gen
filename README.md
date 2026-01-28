@@ -44,12 +44,26 @@ npm install
 npm run dev
 ```
 
-## POC3 — Prompt → response (local, active iteration)
+## POC3 (local, frozen)
 
-`poc3/` starts as a baseline copy of `poc2/` and is the place for further prototype changes.
+`poc3/` starts as a baseline copy of `poc2/`.
+
+Note: `poc3/` is now considered frozen; implement follow-up iterations in `poc4/`.
 
 ```bash
 cd poc3
+cp .env.example .env.local
+npm install
+npm run dev
+```
+
+## POC4 (local, active iteration)
+
+`poc4/` starts as a baseline copy of `poc3/` and is the place for further prototype changes.
+It now primes the model for Strudel output and lets you play generated patterns in the browser.
+
+```bash
+cd poc4
 cp .env.example .env.local
 npm install
 npm run dev

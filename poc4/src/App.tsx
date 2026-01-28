@@ -3,9 +3,133 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import './App.css'
 import { chatStreamMessages, pingOllama, type ChatMessage, type ChatStreamProgress } from './lib/ollama'
+import { ensureStrudelInitialized, playCode, stopPlayback } from './lib/strudel'
 
 function getDefaultPrompt() {
-  return 'Write a short explanation of what Strudel is, in French.'
+  return 'Generate an 8-bar Strudel groove with drums + a simple melody. Use sound(...) for drums and note(...) or n(...).sound(...) for melody. Keep it to 2–3 lines total. Reply only with Strudel code in one fenced code block.'
+}
+
+const STRUDEL_SYSTEM_PROMPT = [
+  'You are a Strudel (https://strudel.cc) expert.',
+  'Follow the Strudel workshop getting-started basics:',
+  '- Use sound("...") patterns for drums (e.g., "bd hh sd oh").',
+  '- Use note("...").sound("piano") or n("...").scale("C:minor").sound("piano") for melody.',
+  '- Set tempo with setcpm(<number>) (cycles per minute).',
+  '- To play multiple parts, prefix each line with $: (e.g., $: sound(...), $: note(...)).',
+  '- Keep output short: 1 optional setcpm line + 2 pattern lines.',
+  '- Do NOT use pattern(...), ellipses (...), or placeholders.',
+  'Return ONLY Strudel code inside a single Markdown fenced code block (```strudel).',
+  'No explanations, no prose, no extra Markdown outside the code block.',
+  'Example structure (keep this exact 2-part shape):',
+  '```strudel',
+  'setcpm(120)',
+  '$: sound("bd hh sd hh")',
+  '$: note("c2 e3 g4 e3").sound("piano")',
+  '```',
+].join('\n')
+
+const SAFE_FALLBACK_CODE = ['setcpm(120)', '$: sound("bd hh sd hh")', '$: note("c2 e3 g4 e3").sound("piano")'].join(
+  '\n',
+)
+
+function sanitizeStrudelCode(raw: string): string {
+  const lines = raw
+    .replace(/\r\n/g, '\n')
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean)
+
+  if (lines.length === 0) return ''
+
+  const expanded: string[] = []
+  for (const line of lines) {
+    if (line.includes('$:')) {
+      const parts = line.split('$:')
+      const head = parts.shift()?.trim()
+      if (head) expanded.push(head)
+      for (const part of parts) {
+        const chunk = part.trim()
+        if (chunk) expanded.push(`$:${chunk}`)
+      }
+      continue
+    }
+    expanded.push(line)
+  }
+
+  if (expanded.length === 0) return ''
+
+  const setTempo = expanded.find((line) => /setcp[ms]\(/i.test(line))
+  const patternLines = expanded.filter((line) => line.startsWith('$:'))
+  if (patternLines.length >= 2) {
+    const lines = [...(setTempo ? [setTempo] : []), patternLines[0], patternLines[1]]
+    return lines.join('\n')
+  }
+
+  return expanded.slice(0, 12).join('\n')
+}
+
+function validateStrudelCode(code: string): { ok: true } | { ok: false; error: string } {
+  if (!code.trim()) return { ok: false, error: 'Empty code.' }
+  if (code.includes('...')) return { ok: false, error: 'Contains placeholder "...".' }
+  if (/\.pattern\(/i.test(code)) return { ok: false, error: 'Uses pattern(...), which is not allowed here.' }
+
+  const lines = code
+    .replace(/\r\n/g, '\n')
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean)
+
+  const setcpmRe = /^setcp[ms]\(\s*\d+(\.\d+)?\s*\)$/i
+  const soundRe = /^\$:\s*sound\("([^"]+)"\)\s*$/i
+  const noteRe = /^\$:\s*note\("([^"]+)"\)\.sound\("([^"]+)"\)\s*$/i
+  const nRe = /^\$:\s*n\("([^"]+)"\)\.scale\("([^"]+)"\)\.sound\("([^"]+)"\)\s*$/i
+
+  let patternLines = 0
+  for (const line of lines) {
+    if (setcpmRe.test(line)) continue
+    if (soundRe.test(line)) {
+      patternLines += 1
+      continue
+    }
+    if (noteRe.test(line)) {
+      patternLines += 1
+      continue
+    }
+    if (nRe.test(line)) {
+      patternLines += 1
+      continue
+    }
+    return { ok: false, error: `Invalid line: ${line}` }
+  }
+
+  if (patternLines < 2) return { ok: false, error: 'Expected two $: pattern lines.' }
+  return { ok: true }
+}
+
+function extractStrudelCode(raw: string): string {
+  const text = raw.trim()
+  if (!text) return ''
+
+  const inlineFenceMatch = text.match(/^```[a-zA-Z0-9_-]*\s*([\s\S]*?)```$/)
+  if (inlineFenceMatch?.[1]?.trim()) return sanitizeStrudelCode(inlineFenceMatch[1].trim())
+
+  const fence = /```[^\n]*\n([\s\S]*?)```/g
+  let match: RegExpExecArray | null = null
+  let last = ''
+  while ((match = fence.exec(text))) {
+    last = match[1]?.trim() ?? ''
+  }
+  if (last) return sanitizeStrudelCode(last)
+
+  const stripped = text.replace(/^```[^\n]*\n?/g, '').replace(/```$/g, '').trim()
+  return sanitizeStrudelCode(stripped)
+}
+
+function extractAndValidateStrudelCode(raw: string): { code: string; warning?: string } {
+  const extracted = extractStrudelCode(raw)
+  const validation = validateStrudelCode(extracted)
+  if (validation.ok) return { code: extracted }
+  return { code: SAFE_FALLBACK_CODE, warning: validation.error }
 }
 
 function splitReflection(raw: string): { reflection: string; answer: string } {
@@ -68,6 +192,8 @@ export default function App() {
       raw: string
       answer: string
       reflection: string
+      code?: string
+      codeWarning?: string
       createdAt: number
       streaming: boolean
       error?: string
@@ -75,6 +201,16 @@ export default function App() {
   >([])
   const historyIdRef = useRef(0)
   const [streamingId, setStreamingId] = useState<number | null>(null)
+  const [playingId, setPlayingId] = useState<number | null>(null)
+  const [audioError, setAudioError] = useState<string>('')
+  const audioContextWarning = useMemo(() => {
+    if (typeof window === 'undefined') return ''
+    const host = window.location.hostname
+    const isLocalhost = host === 'localhost' || host === '127.0.0.1' || host === '[::1]'
+    if (window.isSecureContext || isLocalhost) return ''
+    return 'Audio may fail on non-secure origins. Use http://localhost or HTTPS on LAN.'
+  }, [])
+  const systemMessages = useMemo<ChatMessage[]>(() => [{ role: 'system', content: STRUDEL_SYSTEM_PROMPT }], [])
 
   useEffect(() => {
     let cancelled = false
@@ -94,6 +230,12 @@ export default function App() {
   }, [])
 
   useEffect(() => {
+    return () => {
+      stopPlayback()
+    }
+  }, [])
+
+  useEffect(() => {
     if (!busy || startRef.current === null) return
     const timer = window.setInterval(() => {
       const elapsedMs = Math.max(0, Math.round(performance.now() - (startRef.current ?? performance.now())))
@@ -106,6 +248,9 @@ export default function App() {
     const promptToSend = prompt.trim()
     if (!promptToSend) return
     setPrompt('')
+    stopPlayback()
+    setPlayingId(null)
+    setAudioError('')
 
     abortRef.current?.abort()
     const controller = new AbortController()
@@ -113,6 +258,7 @@ export default function App() {
 
     const base: ChatMessage[] = keepContext ? contextMessages : []
     const userMessage: ChatMessage = { role: 'user', content: promptToSend }
+    const messages: ChatMessage[] = [...systemMessages, ...base, userMessage]
     const id = (historyIdRef.current += 1)
     const createdAt = Date.now()
 
@@ -128,17 +274,19 @@ export default function App() {
         raw: '',
         answer: '',
         reflection: '',
+        code: '',
         createdAt,
         streaming: true,
       },
       ...prev,
     ])
     try {
-      const out = await chatStreamMessages([...base, userMessage], {
+      const out = await chatStreamMessages(messages, {
         signal: controller.signal,
         onUpdate: (content, p) => {
           setProgress(p)
           const { reflection, answer } = splitReflection(content)
+          const code = extractStrudelCode(answer)
           setHistory((prev) =>
             prev.map((item) =>
               item.id === id
@@ -147,6 +295,7 @@ export default function App() {
                     raw: content,
                     reflection,
                     answer,
+                    code: code || item.code,
                     streaming: true,
                   }
                 : item,
@@ -155,7 +304,8 @@ export default function App() {
         },
       })
 
-      const { answer } = splitReflection(out)
+      const { reflection, answer } = splitReflection(out)
+      const validated = extractAndValidateStrudelCode(answer)
       const assistantMessage: ChatMessage = { role: 'assistant', content: (answer || out).trim() }
       setContextMessages([...base, userMessage, assistantMessage])
       setHistory((prev) =>
@@ -164,8 +314,10 @@ export default function App() {
             ? {
                 ...item,
                 raw: out,
-                reflection: splitReflection(out).reflection,
+                reflection,
                 answer: assistantMessage.content,
+                code: validated.code || item.code,
+                codeWarning: validated.warning,
                 streaming: false,
               }
             : item,
@@ -206,6 +358,44 @@ export default function App() {
     }
   }
 
+  async function handleCopyCode(item?: { code?: string }) {
+    const text = item?.code?.trim() ?? ''
+    if (!text) return
+    try {
+      await navigator.clipboard.writeText(text)
+    } catch {
+      // ignore
+    }
+  }
+
+  async function handlePlay(item?: { id: number; code?: string; answer?: string }) {
+    // Prime AudioContext in a user gesture to avoid autoplay restrictions.
+    void ensureStrudelInitialized()
+    const resolved = item?.code?.trim()
+      ? { code: item.code.trim(), warning: undefined }
+      : extractAndValidateStrudelCode(item?.answer ?? '')
+    const code = resolved.code
+    if (!code.trim()) {
+      setAudioError('No Strudel code found to play.')
+      setPlayingId(null)
+      return
+    }
+    setAudioError('')
+    setPlayingId(item?.id ?? null)
+    try {
+      await playCode(code)
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : 'Failed to play Strudel code.'
+      setAudioError(message)
+      setPlayingId(null)
+    }
+  }
+
+  function handleStopAudio() {
+    stopPlayback()
+    setPlayingId(null)
+  }
+
   function handleClearContext() {
     setContextMessages([])
   }
@@ -214,6 +404,8 @@ export default function App() {
     setHistory([])
     setProgress(null)
     setError('')
+    setAudioError('')
+    handleStopAudio()
   }
 
   return (
@@ -221,7 +413,7 @@ export default function App() {
       <div className="content">
         <div className="top">
           <div className="title">
-            <h1>POC3</h1>
+            <h1>POC4</h1>
             <span className="pill">Model: {model}</span>
           </div>
           <span className={`pill ${ollamaStatus.ok ? 'ok' : 'err'}`}>{ollamaStatus.detail}</span>
@@ -282,23 +474,38 @@ export default function App() {
         <div className="card" style={{ marginTop: 14 }}>
           <div className="labelRow">
             <div className="label">History</div>
-            {busy ? (
-              <span className="pill small">
-                Streaming · {formatElapsed(progress?.elapsedMs ?? 0)} · {(progress?.chars ?? 0).toLocaleString()} chars
-              </span>
-            ) : null}
+            <div className="labelMeta">
+              {busy ? (
+                <span className="pill small">
+                  Streaming · {formatElapsed(progress?.elapsedMs ?? 0)} · {(progress?.chars ?? 0).toLocaleString()} chars
+                </span>
+              ) : null}
+              {playingId ? <span className="pill ok small">Audio playing</span> : null}
+            </div>
           </div>
           <div className="actions">
             <button onClick={handleStop} disabled={!busy}>
               Stop
             </button>
+            <button onClick={() => handlePlay(history[0])} disabled={busy || !history[0]?.code?.trim()}>
+              Play latest
+            </button>
+            <button onClick={handleStopAudio} disabled={!playingId}>
+              Stop audio
+            </button>
             <button onClick={handleCopy} disabled={busy || !history[0]?.answer?.trim()}>
               Copy latest
+            </button>
+            <button onClick={() => handleCopyCode(history[0])} disabled={busy || !history[0]?.code?.trim()}>
+              Copy code
             </button>
             <button onClick={handleClearHistory} disabled={busy || history.length === 0}>
               Clear history
             </button>
           </div>
+
+          {audioError ? <div className="errbox">{audioError}</div> : null}
+          {audioContextWarning ? <div className="warnbox">{audioContextWarning}</div> : null}
 
           <div className="historyList">
             {history.length === 0 ? <div className="hint">No responses yet.</div> : null}
@@ -336,6 +543,27 @@ export default function App() {
                     item.error
                   ) : null}
                 </div>
+
+                <div className="labelRow codeRow">
+                  <div className="label">Strudel code</div>
+                  <div className="codeActions">
+                    <button onClick={() => handlePlay(item)} disabled={busy || item.streaming || !item.code?.trim()}>
+                      Play
+                    </button>
+                    <button onClick={handleStopAudio} disabled={playingId !== item.id}>
+                      Stop audio
+                    </button>
+                    <button onClick={() => handleCopyCode(item)} disabled={!item.code?.trim()}>
+                      Copy code
+                    </button>
+                  </div>
+                </div>
+                {item.code?.trim() ? (
+                  <pre className="codeOut">{item.code}</pre>
+                ) : (
+                  <div className="hint">No Strudel code detected in the response yet.</div>
+                )}
+                {item.codeWarning ? <div className="warnbox">Used fallback code: {item.codeWarning}</div> : null}
               </div>
             ))}
           </div>

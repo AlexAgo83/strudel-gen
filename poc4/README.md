@@ -1,4 +1,4 @@
-# POC3 (local)
+# POC4 (local)
 
 Minimal local-only UI that sends a prompt to Ollama and renders the response as Markdown (no Strudel integration yet).
 
@@ -31,6 +31,8 @@ npm run dev
 - **Streaming** updates the latest response live while generation runs.
 - **Shortcut**: `Cmd+Enter` / `Ctrl+Enter` sends the prompt.
 - The prompt input is cleared automatically after sending.
+- The assistant is primed to answer with **Strudel code** in a fenced code block.
+- Use **Play** / **Stop audio** to listen to generated patterns via `@strudel/web`.
 
 ## Run (LAN)
 

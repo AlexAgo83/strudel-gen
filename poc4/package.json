@@ -1,0 +1,45 @@
+{
+  "name": "poc4",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "dev:lan": "vite --host 0.0.0.0",
+    "build": "tsc -b && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "start": "node server.mjs",
+    "ollama:serve": "ollama serve",
+    "ollama:start": "sh -c 'if command -v brew >/dev/null 2>&1; then brew services start ollama; else ollama serve; fi'",
+    "ollama:stop": "sh -c 'if command -v brew >/dev/null 2>&1; then brew services stop ollama; else pkill -f \"ollama serve\" || true; fi'",
+    "ollama:status": "sh -c 'if command -v brew >/dev/null 2>&1; then brew services list | grep -i ollama || true; else ps aux | grep -i \"ollama serve\" | head -n 2 || true; fi'",
+    "ollama:ping": "sh -c 'curl -s http://127.0.0.1:11434/api/version || true'",
+    "ollama:pull": "sh -c 'ollama pull ${MODEL:-qwen3}'"
+  },
+  "dependencies": {
+    "@strudel/web": "^1.3.0",
+    "dotenv": "^16.6.1",
+    "express": "^5.1.0",
+    "http-proxy-middleware": "^3.0.5",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.5",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.1",
+    "eslint": "^9.39.1",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.24",
+    "globals": "^16.5.0",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.46.4",
+    "vite": "^7.2.4",
+    "vite-plugin-pwa": "^1.2.0"
+  }
+}
