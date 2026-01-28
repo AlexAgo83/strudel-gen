@@ -283,6 +283,24 @@ textarea:focus {
   color: rgba(231, 233, 238, 0.92);
 }
 
+.rawStream {
+  margin-top: 12px;
+}
+
+.rawOut {
+  margin: 8px 0 0;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.32);
+  padding: 10px;
+  font-size: 12px;
+  line-height: 1.45;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+}
+
 .reflection {
   margin: 0 0 10px;
   border-radius: 12px;

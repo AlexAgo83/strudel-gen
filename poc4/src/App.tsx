@@ -203,6 +203,7 @@ export default function App() {
   const [streamingId, setStreamingId] = useState<number | null>(null)
   const [playingId, setPlayingId] = useState<number | null>(null)
   const [audioError, setAudioError] = useState<string>('')
+  const [showRawStream, setShowRawStream] = useState(false)
   const audioContextWarning = useMemo(() => {
     if (typeof window === 'undefined') return ''
     const host = window.location.hostname
@@ -369,8 +370,14 @@ export default function App() {
   }
 
   async function handlePlay(item?: { id: number; code?: string; answer?: string }) {
-    // Prime AudioContext in a user gesture to avoid autoplay restrictions.
-    void ensureStrudelInitialized()
+    // Prime AudioContext + preload samples in a user gesture.
+    try {
+      await ensureStrudelInitialized()
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : 'Failed to initialize Strudel audio.'
+      setAudioError(message)
+      return
+    }
     const resolved = item?.code?.trim()
       ? { code: item.code.trim(), warning: undefined }
       : extractAndValidateStrudelCode(item?.answer ?? '')
@@ -502,6 +509,14 @@ export default function App() {
             <button onClick={handleClearHistory} disabled={busy || history.length === 0}>
               Clear history
             </button>
+            <label className="toggle" title="Show the raw streaming text as it arrives (debug).">
+              <input
+                type="checkbox"
+                checked={showRawStream}
+                onChange={(e) => setShowRawStream(e.target.checked)}
+              />
+              Show raw stream
+            </label>
           </div>
 
           {audioError ? <div className="errbox">{audioError}</div> : null}
@@ -564,6 +579,12 @@ export default function App() {
                   <div className="hint">No Strudel code detected in the response yet.</div>
                 )}
                 {item.codeWarning ? <div className="warnbox">Used fallback code: {item.codeWarning}</div> : null}
+                {showRawStream ? (
+                  <div className="rawStream">
+                    <div className="label">Raw stream</div>
+                    <pre className="rawOut">{item.raw || (item.streaming ? '…' : '')}</pre>
+                  </div>
+                ) : null}
               </div>
             ))}
           </div>

@@ -1,10 +1,23 @@
-import { evaluate, hush, initStrudel } from '@strudel/web'
+import { evaluate, hush, initStrudel, samples } from '@strudel/web'
 
 let replPromise: Promise<unknown> | null = null
+let samplesPromise: Promise<unknown> | null = null
+
+function loadDefaultSamples(): Promise<unknown> {
+  if (samplesPromise) return samplesPromise
+  const base = 'https://raw.githubusercontent.com/felixroos/dough-samples/main'
+  samplesPromise = Promise.all([
+    samples(`${base}/tidal-drum-machines.json`),
+    samples(`${base}/piano.json`),
+  ])
+  return samplesPromise
+}
 
 export function ensureStrudelInitialized(): Promise<unknown> {
   if (replPromise) return replPromise
-  replPromise = initStrudel()
+  replPromise = initStrudel({
+    prebake: () => loadDefaultSamples(),
+  })
   return replPromise
 }
 

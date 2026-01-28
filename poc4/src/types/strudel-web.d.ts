@@ -5,4 +5,5 @@ declare module '@strudel/web' {
     autoStart?: boolean,
   ): Promise<unknown | undefined>
   export function hush(): void
+  export function samples(source: string): Promise<unknown>
 }
