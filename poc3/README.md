@@ -49,6 +49,11 @@ npm run build
 npm run start
 ```
 
+## PWA
+
+- The app is a PWA (manifest + service worker). In Chrome/Edge you can install it from the address bar (“Install app”).
+- Service workers require a secure context: they work on `http://localhost` / `http://127.0.0.1`, but not on plain `http://192.168.x.x` (use HTTPS if you want install/offline on a LAN URL).
+
 ## Config
 
 - `VITE_OLLAMA_HOST`: Ollama base URL (default: `http://127.0.0.1:11434`)
