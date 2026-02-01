@@ -19,3 +19,6 @@
 - “Reflection preview” is best-effort because models differ:
   - Some models include `<think>...</think>` blocks or similar tags.
   - If no reflection is present, only the final answer is shown.
+
+# Backlog
+- `logics/backlog/item_002_poc3_streaming_response_progress_reflection.md`

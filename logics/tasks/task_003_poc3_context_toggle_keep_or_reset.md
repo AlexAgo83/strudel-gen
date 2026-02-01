@@ -21,3 +21,5 @@ Derived from `logics/backlog/item_003_poc3_context_toggle_keep_or_reset.md`.
 # Report
 - Added an opt-in “Keep context” toggle and “Clear context” action in `poc3/src/App.tsx`.
 - Added message-based streaming support in `poc3/src/lib/ollama.ts` to send an explicit `messages[]` array to Ollama.
+
+# Notes

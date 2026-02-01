@@ -37,3 +37,4 @@ Promoted from `logics/request/req_001_poc2_prompt_to_response_ollama.md`.
 # Notes
 - Code location: `poc2/`.
 - Security note: anything in `VITE_*` is bundled into frontend assets; do not use `VITE_OLLAMA_API_KEY` outside local prototyping.
+- Derived from `logics/request/req_001_poc2_prompt_to_response_ollama.md`.

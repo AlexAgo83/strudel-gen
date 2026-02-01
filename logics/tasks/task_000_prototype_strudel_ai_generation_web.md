@@ -2,7 +2,7 @@
 > From version: 0.1.0
 > Understanding: 80%
 > Confidence: 65%
-> Progress: 85%
+> Progress: 71%
 
 # Context
 - Related docs: `logics/backlog/item_000_ai_generated_music_with_strudel_generate_preview.md`, `logics/specs/2026-01-23_strudel_ai_music_generation.md`
@@ -29,3 +29,5 @@
 # Report
 - Status: prototype UI and local generation are working under `poc1/`.
 - Known limitation: very small local models can output invalid/unplayable Strudel; mitigations include JSON schema forcing, normalization, repair prompt, and a heuristic rebuild fallback.
+
+# Notes

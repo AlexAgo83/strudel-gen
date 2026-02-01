@@ -21,3 +21,6 @@
   - `VITE_OLLAMA_HOST`, `VITE_OLLAMA_MODEL`, optional `VITE_OLLAMA_API_KEY`, optional `VITE_DISABLE_HMR`.
 - Security note: anything in `VITE_*` is bundled into the frontend build; `VITE_OLLAMA_API_KEY` must be treated as local-only.
 - Current limitations (explicitly acceptable for this POC): no streaming, no chat history, no retry/repair logic, no Strudel playback.
+
+# Backlog
+- `logics/backlog/item_001_poc2_prompt_to_response_ollama.md`

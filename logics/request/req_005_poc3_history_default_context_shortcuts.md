@@ -15,3 +15,6 @@
 # Context
 - POC3 already supports Ollama streaming and a context toggle.
 - We need faster iteration: always-on context, visible response history, and quick keyboard send.
+
+# Backlog
+- `logics/backlog/item_004_poc3_history_default_context_shortcuts.md`

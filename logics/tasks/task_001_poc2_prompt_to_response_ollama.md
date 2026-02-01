@@ -27,3 +27,5 @@ Related spec: `logics/specs/2026-01-27_poc2_prompt_to_response_ollama.md`.
 - Response is rendered as Markdown (GFM) using `react-markdown` + `remark-gfm` (`poc2/src/App.tsx`, `poc2/package.json`).
 - Removed the “Notes” card from the UI and adjusted styling for Markdown output (`poc2/src/App.tsx`, `poc2/src/App.css`).
 - Added Logics docs for traceability: request/backlog/task/spec (`logics/request/req_001_poc2_prompt_to_response_ollama.md`, `logics/backlog/item_001_poc2_prompt_to_response_ollama.md`, `logics/tasks/task_001_poc2_prompt_to_response_ollama.md`, `logics/specs/2026-01-27_poc2_prompt_to_response_ollama.md`).
+
+# Notes

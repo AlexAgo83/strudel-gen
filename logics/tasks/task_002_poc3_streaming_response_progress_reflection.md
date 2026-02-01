@@ -25,3 +25,5 @@ Derived from `logics/backlog/item_002_poc3_streaming_response_progress_reflectio
 - UI shows streaming state and progress (elapsed + chars) and supports cancellation via `AbortController` (`poc3/src/App.tsx`).
 - Reflection preview is best-effort by extracting `<think>`, `<analysis>`, or `<reflection>` blocks (`poc3/src/App.tsx`).
 - Fixed prompt textarea overflow by switching to `box-sizing: border-box` (`poc3/src/index.css`).
+
+# Notes

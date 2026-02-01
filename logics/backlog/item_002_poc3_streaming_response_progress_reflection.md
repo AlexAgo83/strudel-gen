@@ -34,3 +34,4 @@ Promoted from `logics/request/req_003_poc3_streaming_response_progress_reflectio
 
 # Notes
 - Implementation: `poc3/src/lib/ollama.ts` (stream reader) + `poc3/src/App.tsx` (UI/progress/reflection).
+- Derived from `logics/request/req_003_poc3_streaming_response_progress_reflection.md`.

@@ -21,3 +21,6 @@
   - Allowed style presets and sound palette for beginners.
   - Sharing mode for v1: copy only vs shareable URL vs persisted public link.
   - Whether manual code editing is exposed (and when).
+
+# Backlog
+- (none yet)

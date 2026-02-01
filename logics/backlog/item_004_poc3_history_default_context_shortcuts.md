@@ -34,3 +34,8 @@ Promoted from `logics/request/req_005_poc3_history_default_context_shortcuts.md`
 
 # Notes
 - Implementation lives in `poc3/src/App.tsx` and `poc3/src/App.css`.
+
+- Derived from `logics/request/req_005_poc3_history_default_context_shortcuts.md`.
+# Priority
+- Impact:
+- Urgency:

@@ -20,3 +20,5 @@ Derived from `logics/backlog/item_004_poc3_history_default_context_shortcuts.md`
 - Added response history (latest first) with live streaming updates in `poc3/src/App.tsx`.
 - Defaulted “Keep context” to ON and cleared the prompt on send.
 - Added `Cmd+Enter` / `Ctrl+Enter` shortcut and moved actions to the top of the history panel.
+
+# Notes

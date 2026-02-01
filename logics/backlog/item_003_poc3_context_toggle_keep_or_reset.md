@@ -33,3 +33,4 @@ Promoted from `logics/request/req_004_poc3_context_toggle_keep_or_reset.md`.
 
 # Notes
 - Implementation lives in `poc3/src/App.tsx` (state + UI) and `poc3/src/lib/ollama.ts` (message-based streaming).
+- Derived from `logics/request/req_004_poc3_context_toggle_keep_or_reset.md`.

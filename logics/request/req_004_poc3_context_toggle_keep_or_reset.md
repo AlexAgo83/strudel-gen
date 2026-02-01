@@ -13,3 +13,6 @@
 - Today `poc3/` sends a single `messages: [{ role: "user", content: prompt }]` to Ollama.
 - With Ollama chat, “context” is represented by sending a longer `messages` array including previous user/assistant turns.
 - This is an opt-in feature: sometimes users want a clean prompt (no context), sometimes they want follow-ups (“continue”, “refine”, “same constraints”).
+
+# Backlog
+- `logics/backlog/item_003_poc3_context_toggle_keep_or_reset.md`
